@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programacao_Web_N1_AT2 - Quiz Naruto</title>
+    <style>
+        /* CSS Básico para estilizar a interface */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 { color: #e67e22; }
+        h2 { font-size: 1.2em; color: #555; }
+
+        .hidden { display: none; }
+
+        button {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+
+        button:hover { background-color: #d35400; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            background-color: #ecf0f1;
+            color: #333;
+            border: 2px solid transparent;
+            text-align: left;
+        }
+
+        .option-btn:hover { background-color: #dfe6e9; }
+        
+        .option-btn.selected {
+            border-color: #e67e22;
+            background-color: #fae5d3;
+        }
+
+        .result-image {
+            max-width: 200px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="tela-inicial">
+            <h1>Bem-vindo à Vila da Folha!</h1>
+            <h2>Este sistema encontrará o personagem perfeito do universo de Naruto que mais combina com você!</h2>
+            <p>Responda com sinceridade a um questionário de 10 perguntas e descubra se o seu caminho ninja se alinha mais com a determinação, a genialidade ou a estratégia.</p>
+            <button id="btn-comecar">Começar Questionário</button>
+        </div>
+
+        <div id="tela-quiz" class="hidden">
+            <h2 id="texto-pergunta">Pergunta vai aqui...</h2>
+            <div id="container-opcoes" class="options-container">
+                </div>
+            <button id="btn-proximo" disabled>Próxima Pergunta</button>
+        </div>
+
+        <div id="tela-resultado" class="hidden">
+            <h1>Seu Personagem é...</h1>
+            <h2 id="nome-personagem">Nome</h2>
+            <img id="imagem-personagem" class="result-image" src="" alt="Imagem do Personagem">
+            <p id="descricao-personagem">Descrição</p>
+            <p><strong>Pontuação alcançada neste personagem: <span id="pontos-personagem">0</span> pontos!</strong></p>
+            <button id="btn-reiniciar">Refazer Questionário</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Definição do Universo e Personagens (Objetos)
+        const bancoDePersonagens = {
+            naruto: {
+                nome: "Naruto Uzumaki",
+                descricao: "Você é determinado, barulhento e nunca desiste! Você valoriza seus amigos acima de tudo e tem uma força de vontade inabalável.",
+                imagem: "https://upload.wikimedia.org/wikipedia/pt/thumb/9/94/Naruto_Uzumaki.png/250px-Naruto_Uzumaki.png"
+            },
+            sasuke: {
+                nome: "Sasuke Uchiha",
+                descricao: "Você é focado, independente e um verdadeiro prodígio. Busca sempre superar seus próprios limites, agindo de forma analítica.",
+                imagem: "https://upload.wikimedia.org/wikipedia/pt/thumb/0/02/Sasuke_Uchiha.png/250px-Sasuke_Uchiha.png"
+            },
+            sakura: {
+                nome: "Sakura Haruno",
+                descricao: "Você é inteligente, tem um controle perfeito e é excelente em dar suporte. Quando necessário, demonstra uma força colossal!",
+                imagem: "https://upload.wikimedia.org/wikipedia/pt/thumb/1/1a/Sakura_Haruno.png/250px-Sakura_Haruno.png"
+            }
+        };
+
+        // 2. Lista de Perguntas (Array de Objetos)
+        const listaDePerguntas = [
+            {
+                pergunta: "1. O que você faz no seu tempo livre?",
+                opcoes: [
+                    { texto: "Treino até a exaustão para ficar mais forte.", pontos: { naruto: 3, sasuke: 1, sakura: 2 } },
+                    { texto: "Fico sozinho pensando nos meus objetivos.", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "Estudo livros técnicos ou prático habilidades manuais.", pontos: { naruto: 1, sasuke: 2, sakura: 3 } }
+                ]
+            },
+            {
+                pergunta: "2. Qual é a sua principal motivação?",
+                opcoes: [
+                    { texto: "Proteger e ser reconhecido pelos meus amigos.", pontos: { naruto: 3, sasuke: 1, sakura: 2 } },
+                    { texto: "Conseguir poder para concluir um objetivo pessoal.", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "Ajudar quem eu amo a crescer.", pontos: { naruto: 2, sasuke: 1, sakura: 3 } }
+                ]
+            },
+            {
+                pergunta: "3. Qual é o seu estilo de combate favorito?",
+                opcoes: [
+                    { texto: "Ataques em massa e energia bruta.", pontos: { naruto: 3, sasuke: 1, sakura: 1 } },
+                    { texto: "Técnicas visuais e elementos cortantes.", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "Controle cirúrgico e força física concentrada.", pontos: { naruto: 1, sasuke: 1, sakura: 3 } }
+                ]
+            },
+            {
+                pergunta: "4. Como você age em equipe?",
+                opcoes: [
+                    { texto: "Tomo a frente e ataco o inimigo de surpresa!", pontos: { naruto: 3, sasuke: 1, sakura: 2 } },
+                    { texto: "Prefiro agir sozinho, os outros só me atrasam.", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "Analiso a situação e curo os aliados se precisarem.", pontos: { naruto: 1, sasuke: 1, sakura: 3 } }
+                ]
+            },
+            {
+                pergunta: "5. Qual animal você escolheria como invocação?",
+                opcoes: [
+                    { texto: "Sapo (Versatilidade e salto).", pontos: { naruto: 3, sasuke: 1, sakura: 1 } },
+                    { texto: "Cobra (Furtividade e veneno).", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "Lesma (Regeneração e divisão).", pontos: { naruto: 1, sasuke: 1, sakura: 3 } }
+                ]
+            },
+            {
+                pergunta: "6. Como você lida com uma derrota?",
+                opcoes: [
+                    { texto: "Me levanto, grito que não vou desistir e tento de novo.", pontos: { naruto: 3, sasuke: 1, sakura: 1 } },
+                    { texto: "Fico com muita raiva e busco meios drásticos para evoluir.", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "Choro no início, mas prometo a mim mesmo treinar mais.", pontos: { naruto: 2, sasuke: 1, sakura: 3 } }
+                ]
+            },
+            {
+                pergunta: "7. Qual cor mais te atrai?",
+                opcoes: [
+                    { texto: "Laranja", pontos: { naruto: 3, sasuke: 1, sakura: 1 } },
+                    { texto: "Azul Escuro", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "Vermelho ou Rosa", pontos: { naruto: 1, sasuke: 1, sakura: 3 } }
+                ]
+            },
+            {
+                pergunta: "8. Na escola/academia, quem era você?",
+                opcoes: [
+                    { texto: "O palhaço da turma que queria atenção.", pontos: { naruto: 3, sasuke: 1, sakura: 1 } },
+                    { texto: "O prodígio popular, mas na minha própria bolha.", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "O estudante focado na teoria que tirava notas altas.", pontos: { naruto: 1, sasuke: 2, sakura: 3 } }
+                ]
+            },
+            {
+                pergunta: "9. O que você acha de regras?",
+                opcoes: [
+                    { texto: "Regras foram feitas para serem quebradas se for pela coisa certa.", pontos: { naruto: 3, sasuke: 2, sakura: 1 } },
+                    { texto: "Eu sigo as minhas próprias regras.", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "Regras são importantes para manter a ordem e a segurança.", pontos: { naruto: 1, sasuke: 1, sakura: 3 } }
+                ]
+            },
+            {
+                pergunta: "10. Qual a sua comida favorita?",
+                opcoes: [
+                    { texto: "Lámen bem quente!", pontos: { naruto: 3, sasuke: 1, sakura: 1 } },
+                    { texto: "Comidas mais leves, como tomate ou onigiri.", pontos: { naruto: 1, sasuke: 3, sakura: 1 } },
+                    { texto: "Doces tradicionais, como bolinhos de chuva ou dango.", pontos: { naruto: 1, sasuke: 1, sakura: 3 } }
+                ]
+            }
+        ];
+
+        // 3. Sistema Orientado a Objetos (Classe que gerencia o jogo)
+        class SistemaQuiz {
+            constructor(perguntas, personagens) {
+                this.perguntas = perguntas;
+                this.personagens = personagens;
+                this.indiceAtual = 0;
+                this.pontuacoes = { naruto: 0, sasuke: 0, sakura: 0 }; // Estado inicial
+                this.pontuacaoSelecionada = null; // Armazena a escolha temporária
+
+                // Elementos do DOM (Interação com o HTML)
+                this.telaInicial = document.getElementById("tela-inicial");
+                this.telaQuiz = document.getElementById("tela-quiz");
+                this.telaResultado = document.getElementById("tela-resultado");
+                
+                this.elementoPergunta = document.getElementById("texto-pergunta");
+                this.containerOpcoes = document.getElementById("container-opcoes");
+                this.btnProximo = document.getElementById("btn-proximo");
+            }
+
+            // Inicia os ouvintes de evento (cliques)
+            iniciar() {
+                document.getElementById("btn-comecar").addEventListener("click", () => {
+                    this.telaInicial.classList.add("hidden");
+                    this.telaQuiz.classList.remove("hidden");
+                    this.carregarPergunta();
+                });
+
+                this.btnProximo.addEventListener("click", () => this.avancarPergunta());
+
+                document.getElementById("btn-reiniciar").addEventListener("click", () => this.reiniciarJogo());
+            }
+
+            carregarPergunta() {
+                // Recupera os dados da pergunta atual
+                const perguntaAtual = this.perguntas[this.indiceAtual];
+                this.elementoPergunta.textContent = perguntaAtual.pergunta;
+                this.containerOpcoes.innerHTML = ""; // Limpa as opções antigas
+                this.btnProximo.disabled = true; // Bloqueia o botão até escolher uma opção
+                this.pontuacaoSelecionada = null;
+
+                // Laço de repetição para criar os botões das alternativas
+                perguntaAtual.opcoes.forEach((opcao, index) => {
+                    const botao = document.createElement("button");
+                    botao.classList.add("option-btn");
+                    botao.textContent = opcao.texto;
+                    
+                    // Evento de clique para selecionar a alternativa
+                    botao.addEventListener("click", () => {
+                        // Remove a classe 'selected' de todos os botões
+                        const todosBotoes = this.containerOpcoes.querySelectorAll(".option-btn");
+                        todosBotoes.forEach(b => b.classList.remove("selected"));
+                        
+                        // Adiciona a classe visual ao botão clicado
+                        botao.classList.add("selected");
+                        
+                        // Salva temporariamente os pontos desta alternativa
+                        this.pontuacaoSelecionada = opcao.pontos;
+                        this.btnProximo.disabled = false; // Libera o botão de avançar
+                    });
+
+                    this.containerOpcoes.appendChild(botao);
+                });
+            }
+
+            avancarPergunta() {
+                // Soma os pontos nas variáveis gerais
+                if (this.pontuacaoSelecionada) {
+                    this.pontuacoes.naruto += this.pontuacaoSelecionada.naruto;
+                    this.pontuacoes.sasuke += this.pontuacaoSelecionada.sasuke;
+                    this.pontuacoes.sakura += this.pontuacaoSelecionada.sakura;
+                }
+
+                this.indiceAtual++;
+
+                // Estrutura Condicional para verificar se o quiz acabou
+                if (this.indiceAtual < this.perguntas.length) {
+                    this.carregarPergunta();
+                } else {
+                    this.exibirResultado();
+                }
+            }
+
+            exibirResultado() {
+                this.telaQuiz.classList.add("hidden");
+                this.telaResultado.classList.remove("hidden");
+
+                let maiorPontuacao = 0;
+                let personagemVencedor = "";
+
+                // Laço para identificar a maior pontuação dentro do objeto de pontuações
+                for (let chave in this.pontuacoes) {
+                    if (this.pontuacoes[chave] > maiorPontuacao) {
+                        maiorPontuacao = this.pontuacoes[chave];
+                        personagemVencedor = chave;
+                    }
+                }
+
+                // Atualiza o DOM com os dados do vencedor
+                const dadosVencedor = this.personagens[personagemVencedor];
+                document.getElementById("nome-personagem").textContent = dadosVencedor.nome;
+                document.getElementById("descricao-personagem").textContent = dadosVencedor.descricao;
+                document.getElementById("imagem-personagem").src = dadosVencedor.imagem;
+                document.getElementById("pontos-personagem").textContent = maiorPontuacao;
+            }
+
+            reiniciarJogo() {
+                // Zera as propriedades
+                this.pontuacoes = { naruto: 0, sasuke: 0, sakura: 0 };
+                this.indiceAtual = 0;
+
+                // Altera as telas
+                this.telaResultado.classList.add("hidden");
+                this.telaInicial.classList.remove("hidden");
+            }
+        }
+
+        // Instancia o objeto da classe SistemaQuiz e inicia a aplicação
+        const meuQuiz = new SistemaQuiz(listaDePerguntas, bancoDePersonagens);
+        meuQuiz.iniciar();
+
+    </script>
+</body>
+</html>
