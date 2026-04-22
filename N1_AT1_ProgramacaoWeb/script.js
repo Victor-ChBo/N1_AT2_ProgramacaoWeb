@@ -28,9 +28,9 @@ const listaDePerguntas = [
     {
         pergunta: "2. Qual é a sua principal motivação?",
         opcoes: [
-            { texto: "Matar alguém.", pontos: { naruto: 1, sasuke: 3, sakura: 2 } },
-            { texto: "Ser hokage.", pontos: { naruto: 3, sasuke: 1, sakura: 1 } },
-            { texto: "Ser útil.", pontos: { naruto: 2, sasuke: 1, sakura: 3 } }
+            { texto: "Matar alguém(preocupante).", pontos: { naruto: 1, sasuke: 3, sakura: 2 } },
+            { texto: "Ser hokage.(você nao tem 10 anos cara)", pontos: { naruto: 3, sasuke: 1, sakura: 1 } },
+            { texto: "Ser útil.(boa)", pontos: { naruto: 2, sasuke: 1, sakura: 3 } }
         ]
     },
     {
